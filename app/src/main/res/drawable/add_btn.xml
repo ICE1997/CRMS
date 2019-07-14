@@ -2,12 +2,14 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <size android:height="64dp"
-        android:width="64dp"></size>
+    <size
+        android:width="64dp"
+        android:height="64dp" />
 
-    <gradient android:centerX="0.5"
-        android:centerY="0.5"
-        android:type="sweep"
+    <gradient
+        android:centerX="0.4"
+        android:centerY="0.7"
+        android:endColor="@color/colorAccent"
         android:startColor="@color/colorPrimary"
-        android:endColor="@color/colorAccent"></gradient>
+        android:type="sweep" />
 </shape>

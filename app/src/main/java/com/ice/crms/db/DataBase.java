@@ -17,7 +17,6 @@ public class DataBase{
     public static Connection getConnection() {
         Connection connection = null;
         try {
-            Log.d(TAG, "getConnection: WHTA?");
             Class.forName(DRIVER);
             Log.d(TAG, "getConnection: 正在连接数据库......");
             connection = DriverManager.getConnection(DB_URL,USER,PASSWORD);

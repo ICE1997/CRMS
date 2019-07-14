@@ -1,48 +1,67 @@
 package com.ice.crms;
 
-import android.os.AsyncTask;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
+import com.daimajia.swipe.util.Attributes;
 import com.ice.crms.adapters.CardClientAdapter;
-import com.ice.crms.daos.DaoClientManager;
+import com.ice.crms.layouts.AutoSwipeRefreshLayout;
 import com.ice.crms.models.ClientRelation;
+import com.ice.crms.tasks.ListAsyncTask;
 
-import java.util.LinkedList;
+import java.util.Date;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     private static final String TAG = MainActivity.class.getSimpleName();
     private CardClientAdapter cardClientAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new GetClients().execute();
+
+        RecyclerView recyclerView = findViewById(R.id.cardsClients);
+
+        cardClientAdapter = new CardClientAdapter();
+        cardClientAdapter.setMode(Attributes.Mode.Single);
+        cardClientAdapter.setOnItemClickLitener((v, position) -> {
+
+            ClientRelation clientRelation = cardClientAdapter.getItemData(position);
+
+            Toast.makeText(MainActivity.this, "数据:" + new Date(clientRelation.getDate()).toString(), Toast.LENGTH_SHORT).show();
+
+        });
+        recyclerView.setAdapter(cardClientAdapter);
+
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(llm);
+
+
+        swipeRefreshLayout = (AutoSwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            new ListAsyncTask(swipeRefreshLayout, cardClientAdapter).execute();
+        });
+
+        ((AutoSwipeRefreshLayout) swipeRefreshLayout).autoRefresh();
+
+        findViewById(R.id.addNewClient).setOnClickListener(v->{
+            addNewClientRelation(this);
+        });
+
     }
 
-    private class GetClients extends AsyncTask<Void, Void, LinkedList<ClientRelation>> {
-
-        @Override
-        protected LinkedList<ClientRelation> doInBackground(Void... voids) {
-            return DaoClientManager.getAllRelations();
-        }
-
-        @Override
-        protected void onPostExecute(LinkedList<ClientRelation> clientRelations) {
-            for(ClientRelation clientRelation : clientRelations) {
-                System.out.println(clientRelation.getClientNo());
-            }
-            MainActivity.this.cardClientAdapter = new CardClientAdapter(clientRelations);
-            RecyclerView recyclerView = findViewById(R.id.cardsClients);
-            LinearLayoutManager llm = new LinearLayoutManager(MainActivity.this);
-            llm.setOrientation(LinearLayoutManager.VERTICAL);
-            recyclerView.setLayoutManager(llm);
-            recyclerView.setAdapter(cardClientAdapter);
-
-        }
+    private void addNewClientRelation(Context context){
+        Intent intent = new Intent(this,AddNewClientActivity.class);
+        context.startActivity(intent);
     }
 }

@@ -11,7 +11,6 @@ import java.util.LinkedList;
 
 public class DaoClientManager {
     private static final String TB = "Client";
-    private static Connection conn = DataBase.getConnection();
 
     public static LinkedList<ClientRelation> getAllRelations() {
         int clientNo;
@@ -21,6 +20,9 @@ public class DaoClientManager {
         long date;
         String clientAddr;
         LinkedList<ClientRelation> clientRelations = new LinkedList<>();
+
+        Connection conn = DataBase.getConnection();
+
         try {
             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM " + TB);
             ResultSet resultSet = pstmt.executeQuery();
@@ -35,7 +37,14 @@ public class DaoClientManager {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
         return clientRelations;
     }
 
@@ -47,6 +56,9 @@ public class DaoClientManager {
         long date;
         String clientAddr;
         LinkedList<ClientRelation> clientRelations = new LinkedList<>();
+
+        Connection conn = DataBase.getConnection();
+
         try {
             PreparedStatement pstmt = conn.prepareStatement(" SELECT * FROM " + TB + " WHERE clientNo = ? ");
             pstmt.setInt(1, mClientNo);
@@ -60,9 +72,17 @@ public class DaoClientManager {
                 clientAddr = resultSet.getString("clientAddr");
                 clientRelations.add(new ClientRelation(clientNo, clientName, clientType, clientStatus, date, clientAddr));
             }
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
         return clientRelations;
     }
 
@@ -74,6 +94,9 @@ public class DaoClientManager {
         long date;
         String clientAddr;
         LinkedList<ClientRelation> clientRelations = new LinkedList<>();
+
+        Connection conn = DataBase.getConnection();
+
         try {
             PreparedStatement pstmt = conn.prepareStatement(" SELECT * FROM " + TB + " WHERE clientName like ?");
             pstmt.setString(1, "%" + mClientName + "%");
@@ -87,8 +110,15 @@ public class DaoClientManager {
                 clientAddr = resultSet.getString("clientAddr");
                 clientRelations.add(new ClientRelation(clientNo, clientName, clientType, clientStatus, date, clientAddr));
             }
+            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return clientRelations;
     }
@@ -100,6 +130,8 @@ public class DaoClientManager {
         int clientStatus = relation.getClientStatus();
         long date = relation.getDate();
         String clientAddr = relation.getClientAddr();
+
+        Connection conn = DataBase.getConnection();
 
         try {
             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO " + TB + " ( clientNo, clientName, clientType, clientStatus, buildRelTime ,clientAddr ) VALUES(?,?,?,?,?,?) ");
@@ -117,8 +149,16 @@ public class DaoClientManager {
                 System.out.println("新增失败!");
             }
 
+            pstmt.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -129,6 +169,8 @@ public class DaoClientManager {
         int clientStatus = relation.getClientStatus();
         long date = relation.getDate();
         String clientAddr = relation.getClientAddr();
+
+        Connection conn = DataBase.getConnection();
 
         try {
             PreparedStatement pstmt = conn.prepareStatement("UPDATE " + TB + " SET clientName = ?, clientType = ?, clientStatus = ?, buildRelTime = ? ,clientAddr = ? WHERE clientNo = ? ");
@@ -146,23 +188,44 @@ public class DaoClientManager {
                 System.out.println("修改失败!");
             }
 
+            pstmt.close();
+
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static void deleteRelationByNO(int clientNo) {
+    public static boolean deleteRelationByNO(int clientNo) {
+
+        Connection conn = DataBase.getConnection();
+
         try {
             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM " + TB + " WHERE clientNo = ? ");
             pstmt.setInt(1, clientNo);
             int res = pstmt.executeUpdate();
+            pstmt.close();
             if (res > 0) {
                 System.out.println("删除成功!");
-            } else {
-                System.out.println("删除失败!");
+                return true;
             }
+            System.out.println("删除失败!");
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+        return false;
     }
 }
