@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class CardClientAdapter extends RecyclerView.Adapter<CardClientAdapter.CardsHolder> {
-    LinkedList<ClientRelation> clientRelations;
+    private LinkedList<ClientRelation> clientRelations;
 
 
     public CardClientAdapter(LinkedList<ClientRelation> clientRelations) {

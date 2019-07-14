@@ -25,7 +25,6 @@ public class DaoClientManager {
             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM " + TB);
             ResultSet resultSet = pstmt.executeQuery();
             while (resultSet.next()) {
-
                 clientNo = resultSet.getInt("clientNo");
                 clientName = resultSet.getString("clientName");
                 clientType = resultSet.getInt("clientType");
