@@ -2,12 +2,18 @@ package com.ice.crms;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.daimajia.swipe.util.Attributes;
@@ -23,13 +29,43 @@ public class MainActivity extends AppCompatActivity{
     private static final String TAG = MainActivity.class.getSimpleName();
     private CardClientAdapter cardClientAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private Spinner searchType;
+    private EditText searchContent;
+    private RecyclerView recyclerView;
+    private TextWatcher searchByName = new searchByNameListener();
+    private TextWatcher searchByNo = new searchByNoListener();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = findViewById(R.id.cardsClients);
+        recyclerView = findViewById(R.id.cardsClients);
+        searchType = findViewById(R.id.searchType);
+        searchContent = findViewById(R.id.searchContent);
+
+        searchType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, "onItemSelected: " + position);
+                switch (position) {
+                    case 0:
+                        searchContent.removeTextChangedListener(searchByName);
+                        searchContent.addTextChangedListener(searchByNo);
+                        break;
+                    case 1:
+                        searchContent.removeTextChangedListener(searchByNo);
+                        searchContent.addTextChangedListener(searchByName);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                searchContent.addTextChangedListener(new searchByNoListener());
+            }
+        });
+
 
         cardClientAdapter = new CardClientAdapter();
         cardClientAdapter.setMode(Attributes.Mode.Single);
@@ -63,5 +99,41 @@ public class MainActivity extends AppCompatActivity{
     private void addNewClientRelation(Context context){
         Intent intent = new Intent(this,AddNewClientActivity.class);
         context.startActivity(intent);
+    }
+
+    class searchByNoListener implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            cardClientAdapter.searchByClientNo(s.toString());
+        }
+    }
+
+    class searchByNameListener implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            cardClientAdapter.searchByName(s.toString());
+        }
     }
 }

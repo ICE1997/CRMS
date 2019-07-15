@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
@@ -23,6 +22,8 @@ import java.util.List;
 public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.CardsHolder> {
     private static final String TAG = CardClientAdapter.class.getSimpleName();
     private LinkedList<ClientRelation> clientRelations = new LinkedList<>();
+    private LinkedList<ClientRelation> clientRelationsTemp = new LinkedList<>();
+    private LinkedList<ClientRelation> clientRelationsMain = new LinkedList<>();
     private OnItemClickListener mOnItemClickListener = null;
 
 
@@ -31,6 +32,11 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
     }
 
     public void setClientRelations(LinkedList<ClientRelation> clientRelations) {
+        this.clientRelations = clientRelations;
+        this.clientRelationsMain = clientRelations;
+    }
+
+    public void switchClientRelations(LinkedList<ClientRelation> clientRelations) {
         this.clientRelations = clientRelations;
     }
 
@@ -48,8 +54,8 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         cardsHolder.clientType.setText(clientRelations.get(i).getClientName());
 
         cardsHolder.client.setOnClickListener(v -> {
-            if(mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick(v,i);
+            if (mOnItemClickListener != null) {
+                mOnItemClickListener.onItemClick(v, i);
             }
         });
 
@@ -58,6 +64,11 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
             Log.d(TAG, "onClick: HaLO~~" + v.getTag());
             closeItem(i);
             new DeleteAsyncTask(i, this, clientRelations).execute((int) v.getTag());
+        });
+
+        cardsHolder.clientModify.setOnClickListener(v -> {
+            Log.d(TAG, "onBindViewHolder: ");
+            closeItem(i);
         });
 
     }
@@ -130,6 +141,39 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         this.mOnItemClickListener = mOnItemClickLitener;
     }
 
+    public void searchByName(String name) {
+        if (name != null && !"".equals(name)) {
+            Log.d(TAG, "searchByName: " + name);
+            clientRelationsTemp.clear();
+            for (ClientRelation clientRelation : clientRelationsMain) {
+                if (clientRelation.getClientName().startsWith(name)) {
+                    clientRelationsTemp.add(clientRelation);
+                }
+            }
+            switchClientRelations(clientRelationsTemp);
+            notifyDataSetChanged();
+        } else {
+            switchClientRelations(clientRelationsMain);
+            notifyDataSetChanged();
+        }
+    }
+
+    public void searchByClientNo(String clientNo) {
+        if (clientNo != null && !"".equals(clientNo)) {
+            Log.d(TAG, "searchByClientNo: " + clientNo);
+            clientRelationsTemp.clear();
+            for (ClientRelation clientRelation : clientRelationsMain) {
+                if (Integer.toString(clientRelation.getClientNo()).startsWith(clientNo)) {
+                    clientRelationsTemp.add(clientRelation);
+                }
+            }
+            switchClientRelations(clientRelationsTemp);
+            notifyDataSetChanged();
+        } else {
+            switchClientRelations(clientRelationsMain);
+            notifyDataSetChanged();
+        }
+    }
 
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
@@ -140,6 +184,7 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         private TextView clientType;
         private TextView clientName;
         private Button clientDel;
+        private Button clientModify;
         private View client;
 
         CardsHolder(@NonNull View itemView) {
@@ -148,8 +193,8 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
             clientType = itemView.findViewById(R.id.deviceName);
             clientName = itemView.findViewById(R.id.num);
             clientDel = itemView.findViewById(R.id.client_del);
-
             client = itemView.findViewById(R.id.client);
+            clientModify = itemView.findViewById(R.id.client_modify);
         }
     }
 }
