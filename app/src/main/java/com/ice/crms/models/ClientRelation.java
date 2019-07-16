@@ -17,6 +17,10 @@ public class ClientRelation {
         this.clientAddr = clientAddr;
     }
 
+    public ClientRelation() {
+
+    }
+
     public int getClientNo() {
         return clientNo;
     }

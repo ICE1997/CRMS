@@ -15,7 +15,7 @@ public class ListAsyncTask extends AsyncTask<Void, Void, LinkedList<ClientRelati
     private SwipeRefreshLayout processWiget;
     private CardClientAdapter adapter;
 
-    public ListAsyncTask(SwipeRefreshLayout processWiget,CardClientAdapter adapter) {
+    public ListAsyncTask(SwipeRefreshLayout processWiget, CardClientAdapter adapter) {
         this.processWiget = processWiget;
         this.adapter = adapter;
     }

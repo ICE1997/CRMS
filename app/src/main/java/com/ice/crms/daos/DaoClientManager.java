@@ -35,44 +35,9 @@ public class DaoClientManager {
                 clientAddr = resultSet.getString("clientAddr");
                 clientRelations.add(new ClientRelation(clientNo, clientName, clientType, clientStatus, date, clientAddr));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return clientRelations;
-    }
-
-    public static LinkedList<ClientRelation> getRelationsByNo(int mClientNo) {
-        int clientNo;
-        String clientName;
-        int clientType;
-        int clientStatus;
-        long date;
-        String clientAddr;
-        LinkedList<ClientRelation> clientRelations = new LinkedList<>();
-
-        Connection conn = DataBase.getConnection();
-
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(" SELECT * FROM " + TB + " WHERE clientNo = ? ");
-            pstmt.setInt(1, mClientNo);
-            ResultSet resultSet = pstmt.executeQuery();
-            while (resultSet.next()) {
-                clientNo = resultSet.getInt("clientNo");
-                clientName = resultSet.getString("clientName");
-                clientType = resultSet.getInt("clientType");
-                clientStatus = resultSet.getInt("clientStatus");
-                date = resultSet.getDate("buildRelTime").getTime();
-                clientAddr = resultSet.getString("clientAddr");
-                clientRelations.add(new ClientRelation(clientNo, clientName, clientType, clientStatus, date, clientAddr));
-            }
+            resultSet.close();
             pstmt.close();
+            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -86,53 +51,15 @@ public class DaoClientManager {
         return clientRelations;
     }
 
-    public static LinkedList<ClientRelation> getRelationsByName(String mClientName) {
-        int clientNo;
-        String clientName;
-        int clientType;
-        int clientStatus;
-        long date;
-        String clientAddr;
-        LinkedList<ClientRelation> clientRelations = new LinkedList<>();
-
-        Connection conn = DataBase.getConnection();
-
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(" SELECT * FROM " + TB + " WHERE clientName like ?");
-            pstmt.setString(1, "%" + mClientName + "%");
-            ResultSet resultSet = pstmt.executeQuery();
-            while (resultSet.next()) {
-                clientNo = resultSet.getInt("clientNo");
-                clientName = resultSet.getString("clientName");
-                clientType = resultSet.getInt("clientType");
-                clientStatus = resultSet.getInt("clientStatus");
-                date = resultSet.getDate("buildRelTime").getTime();
-                clientAddr = resultSet.getString("clientAddr");
-                clientRelations.add(new ClientRelation(clientNo, clientName, clientType, clientStatus, date, clientAddr));
-            }
-            pstmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return clientRelations;
-    }
-
-    public static void addRelation(ClientRelation relation) {
+    public static Boolean addRelation(ClientRelation relation) {
         int clientNo = relation.getClientNo();
         String clientName = relation.getClientName();
         int clientType = relation.getClientType();
         int clientStatus = relation.getClientStatus();
         long date = relation.getDate();
         String clientAddr = relation.getClientAddr();
-
+        Boolean result = false;
         Connection conn = DataBase.getConnection();
-
         try {
             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO " + TB + " ( clientNo, clientName, clientType, clientStatus, buildRelTime ,clientAddr ) VALUES(?,?,?,?,?,?) ");
             pstmt.setInt(1, clientNo);
@@ -143,13 +70,16 @@ public class DaoClientManager {
             pstmt.setString(6, clientAddr);
             int res = pstmt.executeUpdate();
 
+            System.out.println(res);
+
             if (res > 0) {
-                System.out.println("新增成功!");
-            } else {
-                System.out.println("新增失败!");
+                result = true;
             }
 
+            conn.close();
             pstmt.close();
+
+            return result;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -160,15 +90,18 @@ public class DaoClientManager {
                 e.printStackTrace();
             }
         }
+        return result;
     }
 
-    public static void modifyRelation(ClientRelation relation) {
+    public static boolean modifyRelation(ClientRelation relation) {
         int clientNo = relation.getClientNo();
         String clientName = relation.getClientName();
         int clientType = relation.getClientType();
         int clientStatus = relation.getClientStatus();
         long date = relation.getDate();
         String clientAddr = relation.getClientAddr();
+
+        boolean result = false;
 
         Connection conn = DataBase.getConnection();
 
@@ -183,13 +116,13 @@ public class DaoClientManager {
             int res = pstmt.executeUpdate();
 
             if (res > 0) {
-                System.out.println("修改成功!");
-            } else {
-                System.out.println("修改失败!");
+                result = true;
             }
 
             pstmt.close();
+            conn.close();
 
+            return result;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -200,6 +133,7 @@ public class DaoClientManager {
                 e.printStackTrace();
             }
         }
+        return result;
     }
 
     public static boolean deleteRelationByNO(int clientNo) {
@@ -212,10 +146,8 @@ public class DaoClientManager {
             int res = pstmt.executeUpdate();
             pstmt.close();
             if (res > 0) {
-                System.out.println("删除成功!");
                 return true;
             }
-            System.out.println("删除失败!");
             return false;
         } catch (SQLException e) {
             e.printStackTrace();

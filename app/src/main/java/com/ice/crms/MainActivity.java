@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.daimajia.swipe.util.Attributes;
 import com.ice.crms.adapters.CardClientAdapter;
@@ -22,10 +21,8 @@ import com.ice.crms.layouts.AutoSwipeRefreshLayout;
 import com.ice.crms.models.ClientRelation;
 import com.ice.crms.tasks.ListAsyncTask;
 
-import java.util.Date;
 
-
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private CardClientAdapter cardClientAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -69,13 +66,32 @@ public class MainActivity extends AppCompatActivity{
 
         cardClientAdapter = new CardClientAdapter();
         cardClientAdapter.setMode(Attributes.Mode.Single);
-        cardClientAdapter.setOnItemClickLitener((v, position) -> {
+        cardClientAdapter.setOnItemClickListener((v, position) -> {
 
             ClientRelation clientRelation = cardClientAdapter.getItemData(position);
-
-            Toast.makeText(MainActivity.this, "数据:" + new Date(clientRelation.getDate()).toString(), Toast.LENGTH_SHORT).show();
-
+            Intent intent = new Intent(this, ClientRelationDetailActivity.class);
+            intent.putExtra("clientNo", clientRelation.getClientNo());
+            intent.putExtra("clientName", clientRelation.getClientName());
+            intent.putExtra("date", clientRelation.getDate());
+            intent.putExtra("clientStatus", clientRelation.getClientStatus());
+            intent.putExtra("clientType", clientRelation.getClientType());
+            intent.putExtra("clientAddr", clientRelation.getClientAddr());
+            startActivity(intent);
         });
+
+        cardClientAdapter.setmOnModifyClickListener((v, position) -> {
+            ClientRelation clientRelation = cardClientAdapter.getItemData(position);
+            Intent intent = new Intent(this, AddNewClientActivity.class);
+            intent.putExtra("MODE", 1);
+            intent.putExtra("clientNo", clientRelation.getClientNo());
+            intent.putExtra("clientName", clientRelation.getClientName());
+            intent.putExtra("date", clientRelation.getDate());
+            intent.putExtra("clientStatus", clientRelation.getClientStatus());
+            intent.putExtra("clientType", clientRelation.getClientType());
+            intent.putExtra("clientAddr", clientRelation.getClientAddr());
+            startActivity(intent);
+        });
+
         recyclerView.setAdapter(cardClientAdapter);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
@@ -90,14 +106,20 @@ public class MainActivity extends AppCompatActivity{
 
         ((AutoSwipeRefreshLayout) swipeRefreshLayout).autoRefresh();
 
-        findViewById(R.id.addNewClient).setOnClickListener(v->{
+        findViewById(R.id.addNewClient).setOnClickListener(v -> {
             addNewClientRelation(this);
         });
 
     }
 
-    private void addNewClientRelation(Context context){
-        Intent intent = new Intent(this,AddNewClientActivity.class);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((AutoSwipeRefreshLayout) swipeRefreshLayout).autoRefresh();
+    }
+
+    private void addNewClientRelation(Context context) {
+        Intent intent = new Intent(this, AddNewClientActivity.class);
         context.startActivity(intent);
     }
 

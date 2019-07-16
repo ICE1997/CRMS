@@ -25,6 +25,7 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
     private LinkedList<ClientRelation> clientRelationsTemp = new LinkedList<>();
     private LinkedList<ClientRelation> clientRelationsMain = new LinkedList<>();
     private OnItemClickListener mOnItemClickListener = null;
+    private OnModifyClickListener mOnModifyClickListener = null;
 
 
     public CardClientAdapter() {
@@ -51,7 +52,6 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
     public void onBindViewHolder(@NonNull CardsHolder cardsHolder, int i) {
         cardsHolder.clientNo.setText(String.format("%s", clientRelations.get(i).getClientNo()));
         cardsHolder.clientName.setText(clientRelations.get(i).getClientName());
-        cardsHolder.clientType.setText(clientRelations.get(i).getClientName());
 
         cardsHolder.client.setOnClickListener(v -> {
             if (mOnItemClickListener != null) {
@@ -62,12 +62,15 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         cardsHolder.clientDel.setTag(clientRelations.get(i).getClientNo());
         cardsHolder.clientDel.setOnClickListener(v -> {
             Log.d(TAG, "onClick: HaLO~~" + v.getTag());
-            closeItem(i);
             new DeleteAsyncTask(i, this, clientRelations).execute((int) v.getTag());
+            closeItem(i);
         });
 
         cardsHolder.clientModify.setOnClickListener(v -> {
             Log.d(TAG, "onBindViewHolder: ");
+            if (mOnModifyClickListener != null) {
+                mOnModifyClickListener.onModifyClick(v, i);
+            }
             closeItem(i);
         });
 
@@ -137,9 +140,6 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         return clientRelations.get(position);
     }
 
-    public void setOnItemClickLitener(OnItemClickListener mOnItemClickLitener) {
-        this.mOnItemClickListener = mOnItemClickLitener;
-    }
 
     public void searchByName(String name) {
         if (name != null && !"".equals(name)) {
@@ -175,13 +175,24 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         }
     }
 
+    public void setOnItemClickListener(OnItemClickListener mOnItemClickLitener) {
+        this.mOnItemClickListener = mOnItemClickLitener;
+    }
+
+    public void setmOnModifyClickListener(OnModifyClickListener mOnModifyClickListener) {
+        this.mOnModifyClickListener = mOnModifyClickListener;
+    }
+
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
 
+    public interface OnModifyClickListener {
+        void onModifyClick(View v, int position);
+    }
+
     class CardsHolder extends RecyclerView.ViewHolder {
         private TextView clientNo;
-        private TextView clientType;
         private TextView clientName;
         private Button clientDel;
         private Button clientModify;
@@ -190,8 +201,7 @@ public class CardClientAdapter extends RecyclerSwipeAdapter<CardClientAdapter.Ca
         CardsHolder(@NonNull View itemView) {
             super(itemView);
             clientNo = itemView.findViewById(R.id.clientNo);
-            clientType = itemView.findViewById(R.id.deviceName);
-            clientName = itemView.findViewById(R.id.num);
+            clientName = itemView.findViewById(R.id.clientName);
             clientDel = itemView.findViewById(R.id.client_del);
             client = itemView.findViewById(R.id.client);
             clientModify = itemView.findViewById(R.id.client_modify);

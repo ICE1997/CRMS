@@ -4,9 +4,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class MD5Util {
-    public static String toMD5L32(String s){
+    public static String toMD5L32(String s) {
         String result = null;
-        if(s.isEmpty()){
+        if (s.isEmpty()) {
             return null;
         }
         try {
@@ -15,9 +15,9 @@ public class MD5Util {
             md.update(byt);
             byte[] bytresult = md.digest();
             StringBuilder sb = new StringBuilder();
-            for(byte b : bytresult) {
+            for (byte b : bytresult) {
                 int bt = b & 0xff;
-                if(bt < 16 ){
+                if (bt < 16) {
                     sb.append(0);
                 }
                 sb.append(Integer.toHexString(bt));
